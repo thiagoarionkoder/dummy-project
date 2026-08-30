@@ -120,3 +120,101 @@ def analyse(text: str) -> dict:
         "found_buzzwords": found_buzzwords,
         "notes": notes,
     }
+
+
+# --- Head-to-head ---------------------------------------------------------
+
+# (key, label, stat getter, is a bigger number better?)
+ROUNDS = [
+    ("skills", "Hard skills", lambda r: r["stats"]["skills"], True),
+    ("buzzwords", "Buzzword restraint", lambda r: r["stats"]["buzzwords"], False),
+    ("exclamations", "Composure", lambda r: r["stats"]["exclamations"], False),
+    ("words", "Substance", lambda r: r["stats"]["words"], True),
+    ("years_claimed", "Experience claimed", lambda r: r["stats"]["years_claimed"], True),
+    ("coffee_index", "Caffeine", lambda r: r["stats"]["coffee_index"], True),
+]
+
+MARGINS = [
+    (40, "A rout. Someone should sit down."),
+    (20, "Comfortable. Not close enough to argue about."),
+    (8, "A clear edge, but keep the runner-up's number."),
+    (1, "Photo finish. The committee flipped a coin and lied about it."),
+]
+
+
+def _round_winner(value_a, value_b, higher_is_better: bool):
+    if value_a == value_b:
+        return "tie"
+    a_ahead = value_a > value_b if higher_is_better else value_a < value_b
+    return "a" if a_ahead else "b"
+
+
+def compare(text_a: str, text_b: str) -> dict:
+    """Judge two curricula against each other. Same science, twice the cruelty."""
+    a, b = analyse(text_a), analyse(text_b)
+
+    rounds = []
+    for key, label, getter, higher_is_better in ROUNDS:
+        value_a, value_b = getter(a), getter(b)
+        rounds.append({
+            "key": key,
+            "label": label,
+            "a": value_a,
+            "b": value_b,
+            "higher_is_better": higher_is_better,
+            "winner": _round_winner(value_a, value_b, higher_is_better),
+        })
+
+    rounds_won = {
+        "a": sum(1 for r in rounds if r["winner"] == "a"),
+        "b": sum(1 for r in rounds if r["winner"] == "b"),
+    }
+
+    margin = abs(a["score"] - b["score"])
+    winner = _round_winner(a["score"], b["score"], True)
+    winner = None if winner == "tie" else winner
+
+    skills_a, skills_b = set(a["found_skills"]), set(b["found_skills"])
+
+    if a["verdict"] == "EMPTY" and b["verdict"] == "EMPTY":
+        verdict = "TWO EMPTY CHAIRS"
+        roast = "Nobody submitted anything. A perfectly balanced nothing."
+    elif winner is None:
+        verdict = "DEAD HEAT"
+        roast = "Identical scores. Statistically improbable, spiritually inevitable."
+    else:
+        verdict = "CANDIDATE A" if winner == "a" else "CANDIDATE B"
+        roast = next(text for threshold, text in MARGINS if margin >= threshold)
+
+    notes = []
+    if winner and rounds_won[winner] < rounds_won["a" if winner == "b" else "b"]:
+        loser = "A" if winner == "b" else "B"
+        notes.append(f"Candidate {loser} won more rounds and still lost on points. "
+                     "The formula is the formula.")
+    shared = sorted(skills_a & skills_b)
+    if shared:
+        notes.append(f"Both list {len(shared)} of the same skill(s): {', '.join(shared)}.")
+    only_a, only_b = sorted(skills_a - skills_b), sorted(skills_b - skills_a)
+    if only_a:
+        notes.append(f"Only A brings: {', '.join(only_a)}.")
+    if only_b:
+        notes.append(f"Only B brings: {', '.join(only_b)}.")
+    if not shared and not only_a and not only_b:
+        notes.append("Neither candidate listed a single recognisable skill. Impressive symmetry.")
+    if a["stats"]["buzzwords"] and a["stats"]["buzzwords"] == b["stats"]["buzzwords"]:
+        notes.append("Equally buzzworded. They may have used the same template.")
+
+    return {
+        "a": a,
+        "b": b,
+        "winner": winner,
+        "verdict": verdict,
+        "roast": roast,
+        "margin": margin,
+        "rounds": rounds,
+        "rounds_won": rounds_won,
+        "shared_skills": shared,
+        "only_a": only_a,
+        "only_b": only_b,
+        "notes": notes,
+    }

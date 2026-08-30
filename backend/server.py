@@ -5,7 +5,7 @@ import os
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import unquote
 
-from analyser import analyse
+from analyser import analyse, compare
 
 PORT = int(os.environ.get("PORT", "8000"))
 FRONTEND = os.path.realpath(
@@ -79,7 +79,8 @@ class Handler(BaseHTTPRequestHandler):
     do_HEAD = do_GET
 
     def do_POST(self):
-        if self.path.split("?")[0] != "/api/analyse":
+        path = self.path.split("?")[0]
+        if path not in ("/api/analyse", "/api/compare"):
             return self._abort(404, "not found")
 
         try:
@@ -98,6 +99,15 @@ class Handler(BaseHTTPRequestHandler):
 
         if not isinstance(data, dict):
             return self._error(400, "body must be a JSON object")
+
+        if path == "/api/compare":
+            texts = []
+            for key in ("a", "b"):
+                value = data.get(key, "")
+                if not isinstance(value, str):
+                    return self._error(400, f"'{key}' must be a string")
+                texts.append(value)
+            return self._send(200, json.dumps(compare(*texts)))
 
         text = data.get("text", "")
         if not isinstance(text, str):
