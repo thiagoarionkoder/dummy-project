@@ -32,6 +32,11 @@ VERDICTS = [
 ]
 
 
+def _mentions(term: str, lower: str) -> bool:
+    """Whole-term match, so 'dynamic' doesn't fire on 'aerodynamics'."""
+    return re.search(rf"(?<![a-z0-9]){re.escape(term)}(?![a-z])", lower) is not None
+
+
 def _stable_noise(text: str, salt: str, span: int) -> int:
     """Deterministic fake randomness, so refreshing doesn't change the verdict."""
     digest = hashlib.sha256((salt + text).encode("utf-8")).hexdigest()
@@ -57,8 +62,8 @@ def analyse(text: str) -> dict:
             "notes": ["Try pasting an actual curriculum. Any curriculum."],
         }
 
-    found_buzzwords = sorted({b for b in BUZZWORDS if b in lower})
-    found_skills = sorted({s for s in SKILLS if re.search(rf"(?<![a-z]){re.escape(s)}(?![a-z])", lower)})
+    found_buzzwords = sorted({b for b in BUZZWORDS if _mentions(b, lower)})
+    found_skills = sorted({s for s in SKILLS if _mentions(s, lower)})
 
     years = [int(y) for y in re.findall(r"(\d{1,2})\+?\s*(?:years?|yrs?)", lower)]
     years_claimed = sum(years)

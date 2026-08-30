@@ -54,6 +54,10 @@ class TestDetection(unittest.TestCase):
         self.assertNotIn("go", analyse("I work at Google on Django.")["found_skills"])
         self.assertIn("go", analyse("I write Go daily.")["found_skills"])
 
+    def test_buzzwords_need_word_boundaries(self):
+        self.assertNotIn("dynamic", analyse("Aerodynamics research, 3 years.")["found_buzzwords"])
+        self.assertIn("dynamic", analyse("A dynamic and proactive lead.")["found_buzzwords"])
+
     def test_skills_are_deduplicated_and_sorted(self):
         found = analyse("Python python PYTHON docker Docker")["found_skills"]
         self.assertEqual(found, ["docker", "python"])
