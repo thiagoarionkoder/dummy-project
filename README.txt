@@ -2,9 +2,9 @@
  CURRICULUM ANALYSER 3000
 ==========================================
 
-
 A silly CV analyser. You paste a curriculum, it gives you a score, a verdict,
 and some unsolicited opinions. The methodology is not defensible.
+
 
 ------------------------------------------
 RUN IT
