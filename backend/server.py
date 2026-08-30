@@ -38,11 +38,13 @@ def resolve_static(path: str):
 class Handler(BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
 
-    def _send(self, status, body, content_type="application/json"):
+    def _send(self, status, body, content_type="application/json", headers=()):
         payload = body if isinstance(body, bytes) else body.encode("utf-8")
         self.send_response(status)
         self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(payload)))
+        for name, value in headers:
+            self.send_header(name, value)
         self.end_headers()
         if self.command != "HEAD":
             self.wfile.write(payload)
@@ -71,7 +73,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._error(404, "not found")
 
         ext = os.path.splitext(target)[1]
-        self._send(200, body, CONTENT_TYPES.get(ext, "application/octet-stream"))
+        self._send(200, body, CONTENT_TYPES.get(ext, "application/octet-stream"),
+                   headers=[("Cache-Control", "no-cache")])
 
     do_HEAD = do_GET
 
