@@ -19,9 +19,12 @@
         <button id="analyse">Analyse me</button>
         <button id="sample" class="ghost">Load a terrible sample</button>
       </div>
+      <p class="hint">Tip: Ctrl+Enter (or Cmd+Enter) to submit.</p>
     </section>
 
-    <section id="results" hidden>
+    <p id="error" class="error" role="alert" hidden></p>
+
+    <section id="results" aria-live="polite" hidden>
       <div class="panel verdict">
         <div class="score-ring"><span id="score">0</span></div>
         <div>

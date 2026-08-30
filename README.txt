@@ -20,14 +20,26 @@ only. Set PORT to use a different port:
     PORT=8731 python3 server.py
 
 ------------------------------------------
+TESTS
+------------------------------------------
+
+    cd backend
+    python3 -m unittest discover -v
+
+Stdlib unittest, no dependencies. The server tests bind a real socket on a
+random port, so they exercise the actual HTTP layer rather than a mock.
+
+------------------------------------------
 WHAT'S IN HERE
 ------------------------------------------
 
-  backend/server.py    HTTP server (stdlib), API + serves the frontend
-  backend/analyser.py  The "algorithm"
-  frontend/index.html  The page
-  frontend/style.css   Dark theme, rounded corners, the usual
-  frontend/app.js      Fetches the API, renders the verdict
+  backend/server.py         HTTP server (stdlib), API + serves the frontend
+  backend/analyser.py       The "algorithm"
+  backend/test_analyser.py  Tests for the scoring and detection
+  backend/test_server.py    Tests for routing, limits, static-file containment
+  frontend/index.html       The page
+  frontend/style.css        Dark theme, rounded corners, the usual
+  frontend/app.js           Fetches the API, renders the verdict
 
 ------------------------------------------
 API
@@ -75,6 +87,10 @@ a comment. Claiming 40+ years of combined experience gets you accused of
 being a vampire.
 
 The "Load a terrible sample" button fills in an intentionally awful CV so
-you can see it fail without incriminating yourself.
+you can see it fail without incriminating yourself. Ctrl+Enter (or Cmd+Enter)
+in the textarea submits.
+
+Static files are served only from frontend/. Malformed request bodies get a
+400, not a stack trace.
 
 Do not use this for actual hiring decisions.
