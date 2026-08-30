@@ -26,6 +26,10 @@ const STAT_LABELS = {
   reading_time_s: "Read time (s)",
 };
 
+const escapeHtml = (s) =>
+  String(s).replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
 function ringColor(score) {
   if (score >= 80) return "#06d6a0";
   if (score >= 50) return "#ffd166";
@@ -34,11 +38,18 @@ function ringColor(score) {
 
 function renderTags(el, items, cls) {
   el.innerHTML = items.length
-    ? items.map((i) => `<span class="tag ${cls}">${i}</span>`).join("")
+    ? items.map((i) => `<span class="tag ${cls}">${escapeHtml(i)}</span>`).join("")
     : '<span class="empty">Nothing at all. Draw your own conclusions.</span>';
 }
 
+function showError(message) {
+  const box = $("error");
+  box.textContent = message;
+  box.hidden = false;
+}
+
 function render(data) {
+  $("error").hidden = true;
   $("results").hidden = false;
   $("score").textContent = data.score;
   $("score").parentElement.style.borderColor = ringColor(data.score);
@@ -46,17 +57,19 @@ function render(data) {
   $("roast").textContent = data.roast;
 
   $("stats").innerHTML = Object.entries(data.stats)
-    .map(([k, v]) => `<div class="stat"><b>${v}</b><span>${STAT_LABELS[k] || k}</span></div>`)
+    .map(([k, v]) => `<div class="stat"><b>${escapeHtml(v)}</b><span>${escapeHtml(STAT_LABELS[k] || k)}</span></div>`)
     .join("");
 
   renderTags($("skills"), data.found_skills, "");
   renderTags($("buzzwords"), data.found_buzzwords, "bad");
-  $("notes").innerHTML = data.notes.map((n) => `<li>${n}</li>`).join("");
+  $("notes").innerHTML = data.notes.map((n) => `<li>${escapeHtml(n)}</li>`).join("");
   $("results").scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
 async function analyse() {
   const btn = $("analyse");
+  if (btn.disabled) return;
+  $("error").hidden = true;
   btn.disabled = true;
   btn.textContent = "Judging…";
   try {
@@ -65,11 +78,12 @@ async function analyse() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text: $("cv").value }),
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "The committee is unavailable.");
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || `The committee is unavailable (${res.status}).`);
     render(data);
   } catch (err) {
-    alert(err.message);
+    $("results").hidden = true;
+    showError(err.message || "Something went wrong. The committee blames you.");
   } finally {
     btn.disabled = false;
     btn.textContent = "Analyse me";
@@ -80,4 +94,12 @@ $("analyse").addEventListener("click", analyse);
 $("sample").addEventListener("click", () => {
   $("cv").value = SAMPLE;
   analyse();
+});
+
+// Ctrl/Cmd+Enter submits, like every other textarea you have ever used.
+$("cv").addEventListener("keydown", (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+    e.preventDefault();
+    analyse();
+  }
 });
