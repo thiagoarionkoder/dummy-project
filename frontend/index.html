@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Curriculum Analyser 3000</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Curriculum Analyser <span class="badge">3000</span></h1>
+      <p class="tagline">Scientifically dubious CV evaluation since this afternoon.</p>
+    </header>
+
+    <section class="panel">
+      <textarea id="cv" placeholder="Paste your curriculum here. Be honest. Or don't."></textarea>
+      <div class="actions">
+        <button id="analyse">Analyse me</button>
+        <button id="sample" class="ghost">Load a terrible sample</button>
+      </div>
+    </section>
+
+    <section id="results" hidden>
+      <div class="panel verdict">
+        <div class="score-ring"><span id="score">0</span></div>
+        <div>
+          <h2 id="verdict">—</h2>
+          <p id="roast" class="roast"></p>
+        </div>
+      </div>
+
+      <div class="grid" id="stats"></div>
+
+      <div class="panel">
+        <h3>Skills detected</h3>
+        <div id="skills" class="tags"></div>
+      </div>
+
+      <div class="panel">
+        <h3>Buzzwords confiscated</h3>
+        <div id="buzzwords" class="tags"></div>
+      </div>
+
+      <div class="panel">
+        <h3>Notes from the committee</h3>
+        <ul id="notes"></ul>
+      </div>
+    </section>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>
