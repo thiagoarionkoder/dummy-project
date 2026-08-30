@@ -10,6 +10,8 @@ import urllib.error
 import urllib.request
 from http.server import ThreadingHTTPServer
 
+import analyser
+import grader
 import server
 from server import Handler, resolve_static
 
@@ -38,9 +40,9 @@ class ServerTestCase(unittest.TestCase):
         cls.httpd.server_close()
         cls.thread.join(timeout=5)
 
-    def post(self, body, headers=None):
+    def post(self, body, headers=None, path="/api/analyse"):
         status, raw, _ = request(
-            self.base + "/api/analyse",
+            self.base + path,
             data=body if isinstance(body, bytes) else json.dumps(body).encode(),
             headers={"Content-Type": "application/json", **(headers or {})},
         )
@@ -54,7 +56,10 @@ class TestRouting(ServerTestCase):
     def test_health(self):
         status, raw, _ = request(self.base + "/api/health")
         self.assertEqual(status, 200)
-        self.assertEqual(json.loads(raw), {"ok": True, "mood": "judgemental"})
+        self.assertEqual(
+            json.loads(raw),
+            {"ok": True, "mood": "judgemental", "grading": grader.available()},
+        )
 
     def test_index_is_served_at_root(self):
         status, raw, headers = request(self.base + "/")
@@ -163,6 +168,55 @@ class TestAnalyseEndpoint(ServerTestCase):
         status, body = self.post({"text": "Résumé: Python, 日本語 🚀, 3 years"})
         self.assertEqual(status, 200)
         self.assertIn("python", body["found_skills"])
+
+
+class TestCompareEndpoint(ServerTestCase):
+    def compare(self, body):
+        return self.post(body, path="/api/compare")
+
+    def test_happy_path(self):
+        status, body = self.compare({
+            "a": "Python, Docker, SQL. 5 years.",
+            "b": "Passionate rockstar ninja!!! PowerPoint.",
+        })
+        self.assertEqual(status, 200)
+        self.assertEqual(body["winner"], "a")
+        self.assertIn("python", body["a"]["found_skills"])
+        self.assertEqual(len(body["rounds"]), len(analyser.ROUNDS))
+
+    def test_missing_sides_are_treated_as_empty(self):
+        status, body = self.compare({})
+        self.assertEqual(status, 200)
+        self.assertEqual(body["verdict"], "TWO EMPTY CHAIRS")
+
+    def test_one_missing_side_still_has_a_winner(self):
+        status, body = self.compare({"a": "Python, Docker, SQL. 5 years."})
+        self.assertEqual(status, 200)
+        self.assertEqual(body["winner"], "a")
+        self.assertEqual(body["b"]["verdict"], "EMPTY")
+
+    def test_non_string_sides_are_400_not_500(self):
+        for body in ({"a": 1, "b": "x"}, {"a": "x", "b": ["y"]}, {"a": None, "b": None}):
+            with self.subTest(body=body):
+                self.assertEqual(self.compare(body)[0], 400)
+
+    def test_malformed_json_is_400_not_500(self):
+        status, body = self.compare(b"{not json")
+        self.assertEqual(status, 400)
+        self.assertIn("error", body)
+
+    def test_non_object_body_is_400_not_500(self):
+        for raw in (b'"just a string"', b"[1, 2, 3]", b"null"):
+            with self.subTest(raw=raw):
+                self.assertEqual(self.compare(raw)[0], 400)
+
+    def test_oversized_body_is_rejected(self):
+        status, body = self.compare({"a": "x" * server.MAX_BODY, "b": "y"})
+        self.assertEqual(status, 413)
+        self.assertIn("novel", body["error"])
+
+    def test_get_on_compare_is_404(self):
+        self.assertEqual(request(self.base + "/api/compare")[0], 404)
 
 
 if __name__ == "__main__":
