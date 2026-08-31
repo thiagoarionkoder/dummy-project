@@ -87,3 +87,25 @@ li { margin-bottom: .35rem; }
   background: #2a1a1f; border: 1px solid #6b3b3b; color: #ff9d9d;
   border-radius: 10px; padding: .8rem 1rem; margin: 0 0 1rem;
 }
+
+.chip {
+  float: right; text-transform: none; letter-spacing: 0;
+  color: var(--muted); font-size: .72rem; font-family: ui-monospace, Menlo, monospace;
+}
+
+h4 { margin: 0 0 .5rem; font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+
+.llm { border-color: #33406b; }
+.llm-head { display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem; }
+.llm-score {
+  flex: 0 0 84px; text-align: center; padding: .6rem;
+  background: #14171f; border: 1px solid var(--line); border-radius: 12px;
+}
+.llm-score b { display: block; font-size: 1.8rem; line-height: 1.1; }
+.llm-score span { color: var(--muted); font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; }
+
+.split { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.tag.good { border-color: #2f5f4c; color: #8ff0ce; }
+
+#bio-stats { margin-bottom: .8rem; }
+#bio-stats .stat b { font-size: 1.1rem; word-break: break-word; }

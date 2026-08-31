@@ -1,7 +1,10 @@
 """The actual science. Do not question it."""
 
-import hashlib
 import re
+
+import biometrics
+import llm
+from fakery import stable_noise
 
 BUZZWORDS = [
     "synergy", "leverage", "disrupt", "rockstar", "ninja", "guru",
@@ -32,10 +35,8 @@ VERDICTS = [
 ]
 
 
-def _stable_noise(text: str, salt: str, span: int) -> int:
-    """Deterministic fake randomness, so refreshing doesn't change the verdict."""
-    digest = hashlib.sha256((salt + text).encode("utf-8")).hexdigest()
-    return int(digest[:8], 16) % span
+# How much of the final score the language model gets to be responsible for.
+LLM_WEIGHT = 0.35
 
 
 def analyse(text: str) -> dict:
@@ -51,10 +52,14 @@ def analyse(text: str) -> dict:
             "roast": "You submitted nothing. Bold. Minimalist. Unemployed.",
             "stats": {"words": 0, "buzzwords": 0, "skills": 0,
                       "years_claimed": 0, "exclamations": 0,
-                      "coffee_index": 0, "reading_time_s": 0},
+                      "coffee_index": 0, "reading_time_s": 0,
+                      "formula_score": 0, "llm_score": 0},
             "found_skills": [],
             "found_buzzwords": [],
             "notes": ["Try pasting an actual curriculum. Any curriculum."],
+            # No words means nothing to scan and nothing to prompt with.
+            "biometrics": biometrics.read(""),
+            "llm": llm.grade(""),
         }
 
     found_buzzwords = sorted({b for b in BUZZWORDS if b in lower})
@@ -74,7 +79,20 @@ def analyse(text: str) -> dict:
     score -= min(len(found_buzzwords) * 6, 30)
     score -= min(exclamations * 3, 15)
     score -= 8 if years_claimed > 40 else 0
-    score += _stable_noise(text, "vibes", 11) - 5  # the vibes coefficient
+    score += stable_noise(text, "vibes", 11) - 5  # the vibes coefficient
+    heuristic_score = max(0, min(100, score))
+
+    scan = biometrics.read(text, stress=len(found_buzzwords) + exclamations)
+    judgement = llm.grade(
+        text,
+        skills=len(found_skills),
+        buzzwords=len(found_buzzwords),
+        exclamations=exclamations,
+        unique_ratio=unique_ratio,
+    )
+
+    # Two graders, one number. The committee calls this "triangulation".
+    score = round(heuristic_score * (1 - LLM_WEIGHT) + judgement["score"] * LLM_WEIGHT)
     score = max(0, min(100, score))
 
     verdict, roast = next((v, r) for threshold, v, r in VERDICTS if score >= threshold)
@@ -95,6 +113,13 @@ def analyse(text: str) -> dict:
             notes.append(comment)
     if unique_ratio < 0.4:
         notes.append("Extremely repetitive. Did you copy-paste a role five times?")
+    if abs(judgement["score"] - heuristic_score) >= 15:
+        notes.append(
+            f"The model says {judgement['score']}, the formula says {heuristic_score}. "
+            "They have been asked to settle it outside."
+        )
+    if scan["honesty_tremor"] >= 0.6:
+        notes.append("Biometrics flagged a tremor. Probably the sensor. Probably.")
     if not notes:
         notes.append("Nothing alarming. Genuinely unsettling.")
 
@@ -108,10 +133,14 @@ def analyse(text: str) -> dict:
             "skills": len(found_skills),
             "years_claimed": years_claimed,
             "exclamations": exclamations,
-            "coffee_index": round(1.5 + _stable_noise(text, "coffee", 60) / 10, 1),
+            "coffee_index": round(1.5 + stable_noise(text, "coffee", 60) / 10, 1),
             "reading_time_s": max(5, round(word_count / 3.5)),
+            "formula_score": heuristic_score,
+            "llm_score": judgement["score"],
         },
         "found_skills": found_skills,
         "found_buzzwords": found_buzzwords,
         "notes": notes,
+        "biometrics": scan,
+        "llm": judgement,
     }

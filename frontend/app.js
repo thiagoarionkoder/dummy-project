@@ -24,6 +24,20 @@ const STAT_LABELS = {
   exclamations: "Exclamations",
   coffee_index: "Coffee index",
   reading_time_s: "Read time (s)",
+  formula_score: "Formula score",
+  llm_score: "LLM score",
+};
+
+const BIO_LABELS = {
+  heart_rate_bpm: "Heart rate (bpm)",
+  pupil_dilation_mm: "Pupil (mm)",
+  palm_sweat_index: "Palm sweat",
+  keystroke_cadence_ms: "Cadence (ms)",
+  honesty_tremor: "Honesty tremor",
+  confidence: "Scan confidence",
+  posture: "Posture",
+  grip: "Grip",
+  ridge_signature: "Ridge signature",
 };
 
 const escapeHtml = (s) =>
@@ -34,6 +48,13 @@ function ringColor(score) {
   if (score >= 80) return "#06d6a0";
   if (score >= 50) return "#ffd166";
   return "#ef476f";
+}
+
+function renderStats(el, source, labels) {
+  el.innerHTML = Object.entries(labels)
+    .filter(([k]) => source[k] !== undefined)
+    .map(([k, label]) => `<div class="stat"><b>${escapeHtml(source[k])}</b><span>${escapeHtml(label)}</span></div>`)
+    .join("");
 }
 
 function renderTags(el, items, cls) {
@@ -60,10 +81,31 @@ function render(data) {
     .map(([k, v]) => `<div class="stat"><b>${escapeHtml(v)}</b><span>${escapeHtml(STAT_LABELS[k] || k)}</span></div>`)
     .join("");
 
+  renderLlm(data.llm);
+  renderBiometrics(data.biometrics);
+
   renderTags($("skills"), data.found_skills, "");
   renderTags($("buzzwords"), data.found_buzzwords, "bad");
   $("notes").innerHTML = data.notes.map((n) => `<li>${escapeHtml(n)}</li>`).join("");
   $("results").scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function renderLlm(llm) {
+  $("llm-model").textContent = `${llm.model} · ${llm.backend}`;
+  $("llm-score").textContent = llm.score;
+  $("llm-score").style.color = ringColor(llm.score);
+  $("llm-summary").textContent = llm.summary;
+  renderTags($("llm-strengths"), llm.strengths, "good");
+  renderTags($("llm-concerns"), llm.concerns, "bad");
+  $("llm-meta").textContent =
+    `${llm.tokens.prompt} prompt + ${llm.tokens.completion} completion tokens · ` +
+    `${llm.latency_ms} ms · confidence ${llm.confidence} · trace ${llm.trace_id}`;
+}
+
+function renderBiometrics(bio) {
+  $("bio-sensor").textContent = `${bio.sensor} · fw ${bio.firmware}`;
+  renderStats($("bio-stats"), bio, BIO_LABELS);
+  $("bio-notes").innerHTML = bio.notes.map((n) => `<li>${escapeHtml(n)}</li>`).join("");
 }
 
 async function analyse() {
@@ -71,7 +113,7 @@ async function analyse() {
   if (btn.disabled) return;
   $("error").hidden = true;
   btn.disabled = true;
-  btn.textContent = "Judging…";
+  btn.textContent = "Scanning palm…";
   try {
     const res = await fetch("/api/analyse", {
       method: "POST",

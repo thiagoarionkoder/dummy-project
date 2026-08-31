@@ -35,6 +35,32 @@
 
       <div class="grid" id="stats"></div>
 
+      <div class="panel llm">
+        <h3>Model assessment <span class="chip" id="llm-model">—</span></h3>
+        <div class="llm-head">
+          <div class="llm-score"><b id="llm-score">0</b><span>LLM score</span></div>
+          <p id="llm-summary" class="roast"></p>
+        </div>
+        <div class="split">
+          <div>
+            <h4>Strengths</h4>
+            <div id="llm-strengths" class="tags"></div>
+          </div>
+          <div>
+            <h4>Concerns</h4>
+            <div id="llm-concerns" class="tags"></div>
+          </div>
+        </div>
+        <p class="hint" id="llm-meta"></p>
+      </div>
+
+      <div class="panel">
+        <h3>Biometric reading <span class="chip" id="bio-sensor">—</span></h3>
+        <div class="grid" id="bio-stats"></div>
+        <ul id="bio-notes"></ul>
+        <p class="hint">Readings are simulated. There is no sensor attached to your hand.</p>
+      </div>
+
       <div class="panel">
         <h3>Skills detected</h3>
         <div id="skills" class="tags"></div>
