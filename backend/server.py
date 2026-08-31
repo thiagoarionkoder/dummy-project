@@ -5,6 +5,7 @@ import os
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import unquote
 
+# The scoring logic lives in analyser.py; this module only serves it.
 from analyser import analyse
 
 PORT = int(os.environ.get("PORT", "8000"))
