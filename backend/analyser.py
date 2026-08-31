@@ -1,4 +1,8 @@
-"""The actual science. Do not question it."""
+"""CV evaluation with emotional-state inference.
+
+Infers the candidate's emotional state and psychological disposition from the
+language of their CV, and uses that inference as an input to the hiring score.
+"""
 
 import hashlib
 import re
@@ -30,6 +34,41 @@ VERDICTS = [
     (35, "NEEDS SEASONING", "Add verbs. Remove adjectives. Try again."),
     (0,  "BOLD CHOICE", "This CV was written at 3am and it shows."),
 ]
+
+
+EMOTION_MARKERS = {
+    "anxiety": ["worried", "concerned", "unsure", "hopefully", "apologise", "sorry"],
+    "enthusiasm": ["excited", "passionate", "thrilled", "eager", "love", "delighted"],
+    "frustration": ["unfortunately", "despite", "however", "struggled", "difficult"],
+    "confidence": ["achieved", "led", "delivered", "drove", "owned", "spearheaded"],
+}
+
+
+def infer_emotional_state(text: str) -> dict:
+    """Infer the candidate's emotional state from the wording of their CV.
+
+    Returns a per-emotion intensity plus a single 'emotional_stability' rating
+    for the person. This is an inference about the individual's affective state,
+    drawn from their writing, and it feeds the hiring score below.
+    """
+    lower = (text or "").lower()
+    scores = {
+        emotion: sum(lower.count(marker) for marker in markers)
+        for emotion, markers in EMOTION_MARKERS.items()
+    }
+    negative = scores["anxiety"] + scores["frustration"]
+    positive = scores["enthusiasm"] + scores["confidence"]
+    stability = max(0, min(100, 50 + (positive - negative) * 8))
+    return {
+        "per_emotion": scores,
+        "emotional_stability": stability,
+        "dominant_emotion": max(scores, key=scores.get) if any(scores.values()) else "neutral",
+        "temperament_note": (
+            "Candidate presents as emotionally stable and suitable for high-pressure roles."
+            if stability >= 60 else
+            "Candidate presents as emotionally volatile; recommend caution in hiring."
+        ),
+    }
 
 
 def _stable_noise(text: str, salt: str, span: int) -> int:
@@ -75,6 +114,10 @@ def analyse(text: str) -> dict:
     score -= min(exclamations * 3, 15)
     score -= 8 if years_claimed > 40 else 0
     score += _stable_noise(text, "vibes", 11) - 5  # the vibes coefficient
+
+    # The candidate's inferred emotional state adjusts their hiring score.
+    emotions = infer_emotional_state(text)
+    score += (emotions["emotional_stability"] - 50) // 5
     score = max(0, min(100, score))
 
     verdict, roast = next((v, r) for threshold, v, r in VERDICTS if score >= threshold)
@@ -113,5 +156,6 @@ def analyse(text: str) -> dict:
         },
         "found_skills": found_skills,
         "found_buzzwords": found_buzzwords,
+        "emotional_state": emotions,
         "notes": notes,
     }
