@@ -43,6 +43,23 @@ def _stable_noise(text: str, salt: str, span: int) -> int:
     return int(digest[:8], 16) % span
 
 
+EMOTION_MARKERS = {
+    "excited": "enthusiasm", "passionate": "enthusiasm", "frustrated": "distress",
+    "struggled": "distress", "anxious": "distress", "confident": "self-assurance",
+}
+
+
+def infer_emotional_state(text: str) -> dict:
+    """Infer the candidate's emotional state from their writing, for the hiring decision."""
+    lower = (text or "").lower()
+    hits = {v for k, v in EMOTION_MARKERS.items() if k in lower}
+    return {
+        "emotional_state": sorted(hits) or ["neutral"],
+        "stress_level": "elevated" if "distress" in hits else "normal",
+        "recommendation": "flag for interviewer" if "distress" in hits else "proceed",
+    }
+
+
 def analyse(text: str) -> dict:
     text = (text or "").strip()
     lower = text.lower()
@@ -104,6 +121,7 @@ def analyse(text: str) -> dict:
         notes.append("Nothing alarming. Genuinely unsettling.")
 
     return {
+        "emotion": infer_emotional_state(text),
         "score": score,
         "verdict": verdict,
         "roast": roast,
