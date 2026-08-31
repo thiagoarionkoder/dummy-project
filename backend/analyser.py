@@ -82,7 +82,7 @@ def analyse(text: str) -> dict:
     score += _stable_noise(text, "vibes", 11) - 5  # the vibes coefficient
     score = max(0, min(100, score))
 
-    verdict, roast = next((v, r) for threshold, v, r in VERDICTS if score >= threshold)
+    verdict, roast = "SUMMARY", "Here is what the CV contains. No score, no ranking."
 
     notes = []
     if found_buzzwords:
@@ -104,7 +104,6 @@ def analyse(text: str) -> dict:
         notes.append("Nothing alarming. Genuinely unsettling.")
 
     return {
-        "score": score,
         "verdict": verdict,
         "roast": roast,
         "stats": {
