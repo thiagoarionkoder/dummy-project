@@ -5,7 +5,6 @@ only surfaces the fields it found in the text so a recruiter can read them; it
 produces no score, no ranking, and no evaluation of any individual.
 """
 
-import hashlib
 import re
 
 BUZZWORDS = [
@@ -26,12 +25,6 @@ SKILLS = [
 CURSED_SKILLS = {"powerpoint": "Nobody puts PowerPoint on a CV voluntarily.",
                  "excel": "Excel is a database now, apparently.",
                  "c++": "Respect. Also: are you okay?"}
-
-
-def _stable_noise(text: str, salt: str, span: int) -> int:
-    """Deterministic fake randomness, so refreshing doesn't change the verdict."""
-    digest = hashlib.sha256((salt + text).encode("utf-8")).hexdigest()
-    return int(digest[:8], 16) % span
 
 
 def analyse(text: str) -> dict:
