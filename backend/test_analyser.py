@@ -2,7 +2,7 @@
 
 import unittest
 
-from analyser import BUZZWORDS, SKILLS, analyse
+from analyser import BUZZWORDS, ROUNDS, SKILLS, analyse, compare
 
 
 class TestEmpty(unittest.TestCase):
@@ -77,6 +77,82 @@ class TestDetection(unittest.TestCase):
 
     def test_notes_never_empty(self):
         self.assertTrue(analyse("Wrote software. Shipped it. Went home.")["notes"])
+
+
+class TestCompare(unittest.TestCase):
+    STRONG = "Python, Go, SQL, Docker, Kubernetes, Terraform, AWS. 8 years."
+    WEAK = "Passionate proactive rockstar ninja guru!!!!! Synergy. PowerPoint."
+
+    def test_better_cv_wins(self):
+        r = compare(self.STRONG, self.WEAK)
+        self.assertEqual(r["winner"], "a")
+        self.assertEqual(r["verdict"], "CANDIDATE A")
+        self.assertGreater(r["a"]["score"], r["b"]["score"])
+
+    def test_swapping_sides_swaps_the_winner(self):
+        forward = compare(self.STRONG, self.WEAK)
+        backward = compare(self.WEAK, self.STRONG)
+        self.assertEqual(backward["winner"], "b")
+        self.assertEqual(forward["margin"], backward["margin"])
+        self.assertEqual(forward["a"], backward["b"])
+
+    def test_identical_cvs_are_a_dead_heat(self):
+        r = compare(self.STRONG, self.STRONG)
+        self.assertIsNone(r["winner"])
+        self.assertEqual(r["verdict"], "DEAD HEAT")
+        self.assertEqual(r["margin"], 0)
+        self.assertTrue(all(rnd["winner"] == "tie" for rnd in r["rounds"]))
+
+    def test_two_empties_get_their_own_verdict(self):
+        r = compare("", "   ")
+        self.assertEqual(r["verdict"], "TWO EMPTY CHAIRS")
+        self.assertIsNone(r["winner"])
+
+    def test_margin_is_the_score_gap(self):
+        r = compare(self.STRONG, self.WEAK)
+        self.assertEqual(r["margin"], abs(r["a"]["score"] - r["b"]["score"]))
+
+    def test_rounds_cover_every_category(self):
+        r = compare(self.STRONG, self.WEAK)
+        self.assertEqual([rnd["key"] for rnd in r["rounds"]], [k for k, _, _, _ in ROUNDS])
+        for rnd in r["rounds"]:
+            with self.subTest(round=rnd["key"]):
+                self.assertIn(rnd["winner"], {"a", "b", "tie"})
+
+    def test_lower_is_better_rounds_are_inverted(self):
+        r = compare("Python. Docker.", "Python. Docker. Synergy, leverage, disrupt.")
+        buzz = next(rnd for rnd in r["rounds"] if rnd["key"] == "buzzwords")
+        self.assertFalse(buzz["higher_is_better"])
+        self.assertEqual(buzz["a"], 0)
+        self.assertEqual(buzz["winner"], "a")
+
+    def test_rounds_won_matches_the_rounds(self):
+        r = compare(self.STRONG, self.WEAK)
+        for side in ("a", "b"):
+            with self.subTest(side=side):
+                self.assertEqual(r["rounds_won"][side],
+                                 sum(1 for rnd in r["rounds"] if rnd["winner"] == side))
+
+    def test_skill_overlap_is_partitioned(self):
+        r = compare("Python and Docker.", "Python and React.")
+        self.assertEqual(r["shared_skills"], ["python"])
+        self.assertEqual(r["only_a"], ["docker"])
+        self.assertEqual(r["only_b"], ["react"])
+
+    def test_deterministic(self):
+        self.assertEqual(compare(self.STRONG, self.WEAK), compare(self.STRONG, self.WEAK))
+
+    def test_compare_contract(self):
+        r = compare(self.STRONG, self.WEAK)
+        self.assertEqual(set(r), {"a", "b", "winner", "verdict", "roast", "margin",
+                                  "rounds", "rounds_won", "shared_skills",
+                                  "only_a", "only_b", "notes"})
+        self.assertEqual(set(r["a"]), set(analyse(self.STRONG)))
+        self.assertTrue(r["notes"])
+
+    def test_none_is_tolerated_like_analyse(self):
+        r = compare(None, None)
+        self.assertEqual(r["verdict"], "TWO EMPTY CHAIRS")
 
 
 class TestShape(unittest.TestCase):

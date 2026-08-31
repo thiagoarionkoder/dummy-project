@@ -13,8 +13,22 @@
       <p class="tagline">Scientifically dubious CV evaluation since this afternoon.</p>
     </header>
 
+    <div class="modes" role="tablist" aria-label="Analysis mode">
+      <button id="mode-solo" class="mode active" role="tab" aria-selected="true">Solo</button>
+      <button id="mode-versus" class="mode" role="tab" aria-selected="false">Head-to-head</button>
+    </div>
+
     <section class="panel">
-      <textarea id="cv" aria-label="Curriculum text" maxlength="100000" placeholder="Paste your curriculum here. Be honest. Or don't."></textarea>
+      <div class="inputs" id="inputs">
+        <div class="input">
+          <label class="side-label" id="label-a" for="cv" hidden>Candidate A</label>
+          <textarea id="cv" aria-label="Curriculum text" maxlength="100000" placeholder="Paste your curriculum here. Be honest. Or don't."></textarea>
+        </div>
+        <div class="input" id="input-b" hidden>
+          <label class="side-label" for="cv-b">Candidate B</label>
+          <textarea id="cv-b" aria-label="Second curriculum text" maxlength="100000" placeholder="Paste the rival curriculum here. No pressure."></textarea>
+        </div>
+      </div>
       <div class="actions">
         <button id="analyse">Analyse me</button>
         <button id="sample" class="ghost">Load a terrible sample</button>
@@ -45,9 +59,91 @@
         <div id="buzzwords" class="tags"></div>
       </div>
 
+      <div class="panel" id="grade-panel" hidden>
+        <div class="panel-head">
+          <h3>Report card <span class="muted">graded by an LLM</span></h3>
+          <button id="grade" class="ghost">Grade me properly</button>
+        </div>
+        <p id="grade-error" class="error" role="alert" hidden></p>
+        <div id="report-card" hidden>
+          <div class="gpa">
+            <div><b id="gpa">—</b><span>GPA</span></div>
+            <div><b id="overall-grade">—</b><span>Overall</span></div>
+          </div>
+          <table class="rounds report">
+            <thead>
+              <tr><th>Subject</th><th>Grade</th><th class="comment">Comment</th></tr>
+            </thead>
+            <tbody id="grade-rows"></tbody>
+          </table>
+          <p id="grade-summary" class="roast"></p>
+        </div>
+      </div>
+
       <div class="panel">
         <h3>Notes from the committee</h3>
         <ul id="notes"></ul>
+      </div>
+    </section>
+
+    <section id="versus-results" aria-live="polite" hidden>
+      <div class="panel versus-head">
+        <div class="corner" id="corner-a">
+          <div class="score-ring small"><span id="vs-score-a">0</span></div>
+          <b>Candidate A</b>
+          <span id="vs-verdict-a" class="muted"></span>
+        </div>
+        <div class="versus-middle">
+          <h2 id="vs-verdict">—</h2>
+          <p id="vs-roast" class="roast"></p>
+          <p id="vs-margin" class="hint"></p>
+        </div>
+        <div class="corner" id="corner-b">
+          <div class="score-ring small"><span id="vs-score-b">0</span></div>
+          <b>Candidate B</b>
+          <span id="vs-verdict-b" class="muted"></span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Round by round</h3>
+        <table class="rounds">
+          <thead>
+            <tr><th>Round</th><th>A</th><th>B</th><th>Winner</th></tr>
+          </thead>
+          <tbody id="vs-rounds"></tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <h3>Skill overlap</h3>
+        <div class="overlap">
+          <div><b>Only A</b><div id="vs-only-a" class="tags"></div></div>
+          <div><b>Shared</b><div id="vs-shared" class="tags"></div></div>
+          <div><b>Only B</b><div id="vs-only-b" class="tags"></div></div>
+        </div>
+      </div>
+
+      <div class="panel" id="vs-grade-panel" hidden>
+        <div class="panel-head">
+          <h3>The examinations board <span class="muted">graded by an LLM</span></h3>
+          <button id="vs-grade" class="ghost">Break the tie</button>
+        </div>
+        <p id="vs-grade-error" class="error" role="alert" hidden></p>
+        <div id="vs-report-card" hidden>
+          <div class="gpa">
+            <div><b id="vs-grade-a">—</b><span>Candidate A</span></div>
+            <div><b id="vs-grade-b">—</b><span>Candidate B</span></div>
+            <div><b id="vs-gpa-margin">—</b><span>GPA margin</span></div>
+          </div>
+          <p id="vs-grade-reasoning" class="roast"></p>
+          <ul id="vs-advice"></ul>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Notes from the committee</h3>
+        <ul id="vs-notes"></ul>
       </div>
     </section>
   </main>
