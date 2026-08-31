@@ -99,3 +99,4 @@ Static files are served only from frontend/. Malformed request bodies get a
 400, not a stack trace.
 
 Do not use this for actual hiring decisions.
+
