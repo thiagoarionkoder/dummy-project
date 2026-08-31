@@ -87,3 +87,5 @@ li { margin-bottom: .35rem; }
   background: #2a1a1f; border: 1px solid #6b3b3b; color: #ff9d9d;
   border-radius: 10px; padding: .8rem 1rem; margin: 0 0 1rem;
 }
+
+.hint { opacity: .85; }
