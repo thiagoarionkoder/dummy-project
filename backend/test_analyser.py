@@ -3,6 +3,7 @@
 import unittest
 
 from analyser import BUZZWORDS, SKILLS, analyse
+from biometrics import TRAITS, scan
 
 
 class TestEmpty(unittest.TestCase):
@@ -79,11 +80,40 @@ class TestDetection(unittest.TestCase):
         self.assertTrue(analyse("Wrote software. Shipped it. Went home.")["notes"])
 
 
+class TestBiometrics(unittest.TestCase):
+    def test_scan_is_deterministic_and_bounded(self):
+        text = "Python developer, 5 years, Docker and SQL."
+        self.assertEqual(scan(text), scan(text))
+        for t in (text, "a", "!" * 50, "日本語 🚀"):
+            with self.subTest(text=t[:20]):
+                self.assertGreaterEqual(scan(t)["score"], 0)
+                self.assertLessEqual(scan(t)["score"], 100)
+
+    def test_empty_text_reads_no_signal(self):
+        r = scan("   ")
+        self.assertEqual(r["status"], "NO SIGNAL")
+        self.assertEqual(r["score"], 0)
+        self.assertEqual(r["traits"], [])
+
+    def test_traits_stay_inside_their_range(self):
+        by_key = {t["key"]: t["value"] for t in scan("Python, SQL, Docker.")["traits"]}
+        for key, _label, _unit, _salt, low, high in TRAITS:
+            with self.subTest(trait=key):
+                self.assertGreaterEqual(by_key[key], low)
+                self.assertLessEqual(by_key[key], high)
+
+    def test_analyse_carries_the_scan_and_says_it_is_fake(self):
+        r = analyse("Python, SQL, Docker. 5 years.")
+        self.assertEqual(r["biometrics"], scan("Python, SQL, Docker. 5 years."))
+        self.assertTrue(any("Fake biometric" in n for n in r["notes"]))
+        self.assertIn("Not real biometrics", r["biometrics"]["disclaimer"])
+
+
 class TestShape(unittest.TestCase):
     def test_response_contract(self):
         r = analyse("Python, SQL, Docker. 5 years.")
-        self.assertEqual(set(r), {"score", "verdict", "roast", "stats",
-                                  "found_skills", "found_buzzwords", "notes"})
+        self.assertEqual(set(r), {"score", "verdict", "roast", "stats", "found_skills",
+                                  "found_buzzwords", "biometrics", "notes"})
         self.assertEqual(set(r["stats"]), {"words", "buzzwords", "skills", "years_claimed",
                                            "exclamations", "coffee_index", "reading_time_s"})
         self.assertEqual(r["stats"]["skills"], len(r["found_skills"]))

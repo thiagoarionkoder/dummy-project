@@ -36,6 +36,17 @@ function ringColor(score) {
   return "#ef476f";
 }
 
+function renderBio(bio) {
+  $("bio-score").textContent = bio.score;
+  $("bio-score").style.color = ringColor(bio.score);
+  $("bio-status").textContent = bio.status;
+  $("bio-comment").textContent = bio.comment;
+  $("bio-disclaimer").textContent = bio.disclaimer;
+  $("bio-traits").innerHTML = bio.traits
+    .map((t) => `<div class="stat"><b>${escapeHtml(t.display)}</b><span>${escapeHtml(t.label)}</span></div>`)
+    .join("");
+}
+
 function renderTags(el, items, cls) {
   el.innerHTML = items.length
     ? items.map((i) => `<span class="tag ${cls}">${escapeHtml(i)}</span>`).join("")
@@ -60,6 +71,7 @@ function render(data) {
     .map(([k, v]) => `<div class="stat"><b>${escapeHtml(v)}</b><span>${escapeHtml(STAT_LABELS[k] || k)}</span></div>`)
     .join("");
 
+  renderBio(data.biometrics);
   renderTags($("skills"), data.found_skills, "");
   renderTags($("buzzwords"), data.found_buzzwords, "bad");
   $("notes").innerHTML = data.notes.map((n) => `<li>${escapeHtml(n)}</li>`).join("");

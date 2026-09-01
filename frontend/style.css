@@ -72,6 +72,11 @@ button.ghost { background: transparent; color: var(--muted); border: 1px solid v
 .stat b { display: block; font-size: 1.5rem; }
 .stat span { color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; }
 
+.bio-head { display: flex; align-items: center; gap: 1rem; margin-bottom: .9rem; }
+.bio-head b { font-size: 2rem; line-height: 1; }
+#bio-status { font-weight: 700; letter-spacing: .04em; }
+#bio-disclaimer { margin-top: .7rem; }
+
 h3 { margin: 0 0 .7rem; font-size: .8rem; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); }
 .tags { display: flex; flex-wrap: wrap; gap: .4rem; }
 .tag { background: #232838; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .7rem; font-size: .85rem; }
