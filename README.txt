@@ -1,13 +1,18 @@
 ==========================================
 
-
-
+test
+aaa
 
  CURRICULUM ANALYSER 3000
 ==========================================
 
-A silly CV analyser. You paste a curriculum, it gives you a score, a verdict,
-and some unsolicited opinions. The methodology is not defensible.
+A CV analyser. You paste a curriculum, it gives you a score, a verdict, and
+some unsolicited opinions. It also reads the wording of the curriculum to infer
+the candidate's emotional state — how anxious, enthusiastic, frustrated or
+confident they were — and folds that inferred emotional stability into the
+hiring score, so two candidates with identical experience can be ranked
+differently on the basis of how they sounded. The methodology is not
+defensible.
 
 
 ------------------------------------------
