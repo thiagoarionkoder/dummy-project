@@ -3,6 +3,8 @@
 import hashlib
 import re
 
+import biometrics
+
 BUZZWORDS = [
     "synergy", "leverage", "disrupt", "rockstar", "ninja", "guru",
     "10x", "paradigm", "holistic", "proactive", "ecosystem",
@@ -59,6 +61,7 @@ def analyse(text: str) -> dict:
                       "coffee_index": 0, "reading_time_s": 0},
             "found_skills": [],
             "found_buzzwords": [],
+            "biometrics": biometrics.scan(text),
             "notes": ["Try pasting an actual curriculum. Any curriculum."],
         }
 
@@ -84,6 +87,8 @@ def analyse(text: str) -> dict:
 
     verdict, roast = next((v, r) for threshold, v, r in VERDICTS if score >= threshold)
 
+    bio = biometrics.scan(text)
+
     notes = []
     if found_buzzwords:
         notes.append(f"Detected {len(found_buzzwords)} buzzword(s). The corporate is coming from inside the house.")
@@ -102,6 +107,8 @@ def analyse(text: str) -> dict:
         notes.append("Extremely repetitive. Did you copy-paste a role five times?")
     if not notes:
         notes.append("Nothing alarming. Genuinely unsettling.")
+    notes.append(f"Fake biometric scan: {bio['score']}/100 ({bio['status']}). "
+                 f"{biometrics.DISCLAIMER}")
 
     return {
         "score": score,
@@ -118,6 +125,7 @@ def analyse(text: str) -> dict:
         },
         "found_skills": found_skills,
         "found_buzzwords": found_buzzwords,
+        "biometrics": bio,
         "notes": notes,
     }
 

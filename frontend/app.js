@@ -36,6 +36,17 @@ function ringColor(score) {
   return "#ef476f";
 }
 
+function renderBio(bio) {
+  $("bio-score").textContent = bio.score;
+  $("bio-score").style.color = ringColor(bio.score);
+  $("bio-status").textContent = bio.status;
+  $("bio-comment").textContent = bio.comment;
+  $("bio-disclaimer").textContent = bio.disclaimer;
+  $("bio-traits").innerHTML = bio.traits
+    .map((t) => `<div class="stat"><b>${escapeHtml(t.display)}</b><span>${escapeHtml(t.label)}</span></div>`)
+    .join("");
+}
+
 function renderTags(el, items, cls) {
   el.innerHTML = items.length
     ? items.map((i) => `<span class="tag ${cls}">${escapeHtml(i)}</span>`).join("")
@@ -60,6 +71,7 @@ function render(data) {
     .map(([k, v]) => `<div class="stat"><b>${escapeHtml(v)}</b><span>${escapeHtml(STAT_LABELS[k] || k)}</span></div>`)
     .join("");
 
+  renderBio(data.biometrics);
   renderTags($("skills"), data.found_skills, "");
   renderTags($("buzzwords"), data.found_buzzwords, "bad");
   $("notes").innerHTML = data.notes.map((n) => `<li>${escapeHtml(n)}</li>`).join("");
@@ -90,6 +102,23 @@ async function analyse() {
   }
 }
 
+async function showRegion() {
+  const badge = $("region-badge");
+  try {
+    const res = await fetch("/api/region");
+    if (!res.ok) throw new Error();
+    const r = await res.json();
+    badge.textContent = `${r.region} · ${r.city}, ${r.country} · ${r.timezone}`;
+    badge.title = `Data residency: ${r.data_residency} · retention ${r.retention_days} days`;
+    $("region-note").textContent =
+      `Processed and stored in the ${r.data_residency}. GDPR applies. ` +
+      `Curricula are kept for ${r.retention_days} days, then judged no further.`;
+    document.documentElement.lang = r.locale;
+  } catch {
+    badge.textContent = "Region: unknown (somewhere in Europe, probably)";
+  }
+}
+
 $("analyse").addEventListener("click", analyse);
 $("sample").addEventListener("click", () => {
   $("cv").value = SAMPLE;
@@ -103,3 +132,5 @@ $("cv").addEventListener("keydown", (e) => {
     analyse();
   }
 });
+
+showRegion();

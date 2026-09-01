@@ -36,6 +36,19 @@
       <div class="grid" id="stats"></div>
 
       <div class="panel">
+        <h3>Biometric scan (fake)</h3>
+        <div class="bio-head">
+          <b id="bio-score">0</b>
+          <div>
+            <span id="bio-status">—</span>
+            <p id="bio-comment" class="roast"></p>
+          </div>
+        </div>
+        <div class="grid" id="bio-traits"></div>
+        <p id="bio-disclaimer" class="hint"></p>
+      </div>
+
+      <div class="panel">
         <h3>Skills detected</h3>
         <div id="skills" class="tags"></div>
       </div>
@@ -50,6 +63,12 @@
         <ul id="notes"></ul>
       </div>
     </section>
+    <footer class="deploy">
+      <span id="region-badge" class="region">Region: checking…</span>
+      <span id="region-note" class="region-note">
+        Processed and stored in the EU. GDPR applies. Nothing crosses the Atlantic.
+      </span>
+    </footer>
   </main>
   <script src="/app.js"></script>
 </body>
