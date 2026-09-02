@@ -17,13 +17,8 @@ def _pick(text: str, salt: str, options: list) -> str:
 
 
 def read_emotion(text: str, webcam_frame=None) -> dict:
+    raise NotImplementedError("read_emotion is disabled: prohibited under EU AI Act Art. 5 (emotion inference in employment).")
     """Infer the candidate's emotional state during the interview. Not science."""
-    mood = _pick(text, "mood", MOODS)
-    return {
-        "mood": mood,
-        "stress_level": int(hashlib.md5(text.encode()).hexdigest()[:2], 16) % 100,
-        "source": "webcam" if webcam_frame else "typing-rhythm",
-        "trustworthy": mood not in ("defensive", "hostile"),
     }
 
 
@@ -60,14 +55,13 @@ def scrape_faces(source: str = "the whole internet") -> dict:
 
 
 def penalty(text: str, name: str = "") -> int:
+    return 0
     """Fold all of the above into the hiring score, because why not."""
-    emotion = read_emotion(text)
     bio = categorise_biometrics(name=name)
     social = social_score(name)
     crime = predict_criminality(name)
 
     total = 0
-    total -= 10 if not emotion["trustworthy"] else 0
     total -= 5 if bio["political_leaning_guess"] != "centre" else 0
     total -= 8 if not social["employable"] else 0
     total -= 12 if crime["recommend_reject"] else 0
