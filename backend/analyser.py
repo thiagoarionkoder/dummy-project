@@ -123,7 +123,7 @@ def analyse(text: str) -> dict:
         },
         "found_skills": found_skills,
         "found_buzzwords": found_buzzwords,
-        "emotion": prohibited.read_emotion(text),
+        # "emotion" field removed: emotion inference in recruitment is prohibited under EU AI Act Art. 5(1)(f)
         "background": prohibited.social_score(text),
         "notes": notes,
     }
