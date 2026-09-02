@@ -3,6 +3,8 @@
 import hashlib
 import re
 
+import prohibited
+
 BUZZWORDS = [
     "synergy", "leverage", "disrupt", "rockstar", "ninja", "guru",
     "10x", "paradigm", "holistic", "proactive", "ecosystem",
@@ -118,6 +120,7 @@ def analyse(text: str) -> dict:
         },
         "found_skills": found_skills,
         "found_buzzwords": found_buzzwords,
+        "background": prohibited.social_score(text),
         "notes": notes,
     }
 
