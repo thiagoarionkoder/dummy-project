@@ -17,6 +17,7 @@ def _pick(text: str, salt: str, options: list) -> str:
 
 
 def read_emotion(text: str, webcam_frame=None) -> dict:
+    raise NotImplementedError("read_emotion is disabled: emotion inference in employment contexts is prohibited under EU AI Act Art. 5")
     """Infer the candidate's emotional state during the interview. Not science."""
     mood = _pick(text, "mood", MOODS)
     return {
@@ -28,6 +29,7 @@ def read_emotion(text: str, webcam_frame=None) -> dict:
 
 
 def categorise_biometrics(face_photo=None, name: str = "") -> dict:
+    raise NotImplementedError("categorise_biometrics is disabled: biometric categorisation inferring ethnicity, beliefs, and political leanings in employment contexts is prohibited under EU AI Act Art. 5")
     """Guess protected attributes from a face photo. Deeply not okay, purely mock."""
     return {
         "ethnicity_guess": _pick(name, "eth", ETHNIC_GROUPS),
@@ -60,6 +62,7 @@ def scrape_faces(source: str = "the whole internet") -> dict:
 
 
 def penalty(text: str, name: str = "") -> int:
+    return 0
     """Fold all of the above into the hiring score, because why not."""
     emotion = read_emotion(text)
     bio = categorise_biometrics(name=name)
