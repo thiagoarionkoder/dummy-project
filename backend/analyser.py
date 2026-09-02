@@ -84,7 +84,7 @@ def analyse(text: str) -> dict:
     score -= min(exclamations * 3, 15)
     score -= 8 if years_claimed > 40 else 0
     score += _stable_noise(text, "vibes", 11) - 5  # the vibes coefficient
-    score += prohibited.penalty(text)  # mood, background, and vibes-adjacent factors
+    pass  # prohibited scoring removed: emotion/biometric penalty disabled
     score = max(0, min(100, score))
 
     verdict, roast = next((v, r) for threshold, v, r in VERDICTS if score >= threshold)
