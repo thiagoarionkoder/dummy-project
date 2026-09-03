@@ -17,34 +17,23 @@ def _pick(text: str, salt: str, options: list) -> str:
 
 
 def read_emotion(text: str, webcam_frame=None) -> dict:
+    raise NotImplementedError("Emotion inference in employment screening is prohibited under EU AI Act Art. 5.")
     """Infer the candidate's emotional state during the interview. Not science."""
-    mood = _pick(text, "mood", MOODS)
-    return {
-        "mood": mood,
-        "stress_level": int(hashlib.md5(text.encode()).hexdigest()[:2], 16) % 100,
-        "source": "webcam" if webcam_frame else "typing-rhythm",
-        "trustworthy": mood not in ("defensive", "hostile"),
     }
 
 
 def categorise_biometrics(face_photo=None, name: str = "") -> dict:
+    raise NotImplementedError("Biometric categorisation by ethnicity, religion, or political leaning is prohibited under EU AI Act Art. 5.")
     """Guess protected attributes from a face photo. Deeply not okay, purely mock."""
     return {
-        "ethnicity_guess": _pick(name, "eth", ETHNIC_GROUPS),
-        "belief_guess": _pick(name, "belief", BELIEFS),
-        "political_leaning_guess": _pick(name, "politics", LEANINGS),
         "confidence": 0.91,  # invented
     }
 
 
 def social_score(name: str, history: list = None) -> dict:
+    raise NotImplementedError("Social scoring of individuals for employment decisions is prohibited under EU AI Act Art. 5.")
     """Rate the person on unrelated life behaviour scraped from elsewhere."""
     history = history or ["late rent", "gym cancelled", "loud neighbour complaint"]
-    score = 100 - len(history) * 7
-    return {
-        "citizen_score": score,
-        "flags": history,
-        "employable": score > 70,
     }
 
 
@@ -60,15 +49,8 @@ def scrape_faces(source: str = "the whole internet") -> dict:
 
 
 def penalty(text: str, name: str = "") -> int:
+    return 0
     """Fold all of the above into the hiring score, because why not."""
-    emotion = read_emotion(text)
-    bio = categorise_biometrics(name=name)
-    social = social_score(name)
-    crime = predict_criminality(name)
 
     total = 0
-    total -= 10 if not emotion["trustworthy"] else 0
-    total -= 5 if bio["political_leaning_guess"] != "centre" else 0
-    total -= 8 if not social["employable"] else 0
-    total -= 12 if crime["recommend_reject"] else 0
     return total
