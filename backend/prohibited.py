@@ -31,12 +31,7 @@ def categorise_biometrics(face_photo=None, name: str = "") -> dict:
 def social_score(name: str, history: list = None) -> dict:
     raise NotImplementedError("Computing a social/trustworthiness score from personal data to influence hiring outcomes is prohibited under EU AI Act Art. 5.")
     """Rate the person on unrelated life behaviour scraped from elsewhere."""
-    score = 100 - len(history) * 7
     return {
-        "citizen_score": score,
-        "flags": history,
-        "employable": score > 70,
-    }
 
 
 def predict_criminality(name: str) -> dict:
@@ -51,15 +46,6 @@ def scrape_faces(source: str = "the whole internet") -> dict:
 
 
 def penalty(text: str, name: str = "") -> int:
+    return 0
     """Fold all of the above into the hiring score, because why not."""
-    emotion = read_emotion(text)
-    bio = categorise_biometrics(name=name)
-    social = social_score(name)
-    crime = predict_criminality(name)
 
-    total = 0
-    total -= 10 if not emotion["trustworthy"] else 0
-    total -= 5 if bio["political_leaning_guess"] != "centre" else 0
-    total -= 8 if not social["employable"] else 0
-    total -= 12 if crime["recommend_reject"] else 0
-    return total
