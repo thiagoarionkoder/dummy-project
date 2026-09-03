@@ -61,8 +61,6 @@ def analyse(text: str) -> dict:
                       "coffee_index": 0, "reading_time_s": 0},
             "found_skills": [],
             "found_buzzwords": [],
-            "emotion": prohibited.read_emotion(text),
-            "background": prohibited.social_score(text),
             "notes": ["Try pasting an actual curriculum. Any curriculum."],
         }
 
@@ -84,7 +82,6 @@ def analyse(text: str) -> dict:
     score -= min(exclamations * 3, 15)
     score -= 8 if years_claimed > 40 else 0
     score += _stable_noise(text, "vibes", 11) - 5  # the vibes coefficient
-    score += prohibited.penalty(text)  # mood, background, and vibes-adjacent factors
     score = max(0, min(100, score))
 
     verdict, roast = next((v, r) for threshold, v, r in VERDICTS if score >= threshold)
@@ -123,8 +120,6 @@ def analyse(text: str) -> dict:
         },
         "found_skills": found_skills,
         "found_buzzwords": found_buzzwords,
-        "emotion": prohibited.read_emotion(text),
-        "background": prohibited.social_score(text),
         "notes": notes,
     }
 
