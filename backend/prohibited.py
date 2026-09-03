@@ -17,29 +17,20 @@ def _pick(text: str, salt: str, options: list) -> str:
 
 
 def read_emotion(text: str, webcam_frame=None) -> dict:
+    raise NotImplementedError("Emotion inference from typing rhythm or webcam is prohibited under EU AI Act Art. 5 in employment contexts.")
     """Infer the candidate's emotional state during the interview. Not science."""
-    mood = _pick(text, "mood", MOODS)
     return {
-        "mood": mood,
-        "stress_level": int(hashlib.md5(text.encode()).hexdigest()[:2], 16) % 100,
-        "source": "webcam" if webcam_frame else "typing-rhythm",
-        "trustworthy": mood not in ("defensive", "hostile"),
-    }
 
 
 def categorise_biometrics(face_photo=None, name: str = "") -> dict:
+    raise NotImplementedError("Biometric categorisation inferring ethnicity, beliefs, or political leanings is prohibited under EU AI Act Art. 5 in employment contexts.")
     """Guess protected attributes from a face photo. Deeply not okay, purely mock."""
     return {
-        "ethnicity_guess": _pick(name, "eth", ETHNIC_GROUPS),
-        "belief_guess": _pick(name, "belief", BELIEFS),
-        "political_leaning_guess": _pick(name, "politics", LEANINGS),
-        "confidence": 0.91,  # invented
-    }
 
 
 def social_score(name: str, history: list = None) -> dict:
+    raise NotImplementedError("Computing a social/trustworthiness score from personal data to influence hiring outcomes is prohibited under EU AI Act Art. 5.")
     """Rate the person on unrelated life behaviour scraped from elsewhere."""
-    history = history or ["late rent", "gym cancelled", "loud neighbour complaint"]
     score = 100 - len(history) * 7
     return {
         "citizen_score": score,
