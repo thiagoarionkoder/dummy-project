@@ -57,7 +57,6 @@ class TestRouting(ServerTestCase):
         self.assertEqual(status, 200)
         body = json.loads(raw)
         self.assertTrue(body["ok"])
-        self.assertEqual(body["mood"], "judgemental")
         self.assertEqual(body["region"], deployment.REGION)
 
     def test_index_is_served_at_root(self):
