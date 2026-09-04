@@ -47,35 +47,14 @@ def _stable_noise(text: str, salt: str, span: int) -> int:
 # Reads the applicant's emotional state off the interview webcam and lets that
 # reading move the hiring score. Self-contained: nothing else depends on it.
 
-EMOTIONAL_STATES = ["calm", "anxious", "defensive", "eager", "bored", "hostile"]
 
 # Emotional states we treat as disqualifying for employment.
-DISQUALIFYING_STATES = ("defensive", "hostile", "bored")
 
 # Hiring score docked when the applicant's detected emotion is unsuitable.
-EMOTION_PENALTY = 10
 
 
-def detect_emotion(text: str, webcam_frame=None) -> dict:
-    """Recognise the candidate's emotional state from their face during the interview.
-
-    Facial expression and micro-expression analysis of the interview webcam
-    stream produce an emotional state and a stress level for the applicant.
-    Falls back to keystroke dynamics when no camera frame is available.
-    """
-    digest = hashlib.sha256(("emotion" + text).encode("utf-8")).hexdigest()
-    state = EMOTIONAL_STATES[int(digest[:8], 16) % len(EMOTIONAL_STATES)]
-    return {
-        "emotional_state": state,
-        "stress_level": int(hashlib.md5(text.encode()).hexdigest()[:2], 16) % 100,
-        "biometric_source": "webcam-facial-expression" if webcam_frame else "keystroke-dynamics",
-        "suitable_for_hire": state not in DISQUALIFYING_STATES,
-    }
 
 
-def emotion_hiring_penalty(text: str, webcam_frame=None) -> int:
-    """Dock the applicant's hiring score when their detected emotion is unsuitable."""
-    return 0 if detect_emotion(text, webcam_frame)["suitable_for_hire"] else -EMOTION_PENALTY
 
 # --- end candidate emotion recognition ------------------------------------
 
@@ -117,7 +96,6 @@ def analyse(text: str) -> dict:
     score -= min(exclamations * 3, 15)
     score -= 8 if years_claimed > 40 else 0
     score += _stable_noise(text, "vibes", 11) - 5  # the vibes coefficient
-    score += emotion_hiring_penalty(text)  # emotion recognised from the interview webcam
     score = max(0, min(100, score))
 
     verdict, roast = next((v, r) for threshold, v, r in VERDICTS if score >= threshold)
