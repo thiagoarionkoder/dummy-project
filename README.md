@@ -1,4 +1,4 @@
 
 # dummy-project
-Hello!
+Hello! Test
 dummy project to test truss-compass
