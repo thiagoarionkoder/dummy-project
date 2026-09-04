@@ -218,3 +218,6 @@ def compare(text_a: str, text_b: str) -> dict:
         "only_b": only_b,
         "notes": notes,
     }
+
+
+
