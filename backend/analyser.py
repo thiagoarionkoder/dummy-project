@@ -43,6 +43,22 @@ def _stable_noise(text: str, salt: str, span: int) -> int:
     return int(digest[:8], 16) % span
 
 
+# --- Candidate emotion recognition ----------------------------------------
+# Reads the applicant's emotional state off the interview webcam and lets that
+# reading move the hiring score. Self-contained: nothing else depends on it.
+
+
+# Emotional states we treat as disqualifying for employment.
+
+# Hiring score docked when the applicant's detected emotion is unsuitable.
+
+
+
+
+
+# --- end candidate emotion recognition ------------------------------------
+
+
 def analyse(text: str) -> dict:
     text = (text or "").strip()
     lower = text.lower()
