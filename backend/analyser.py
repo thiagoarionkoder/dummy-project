@@ -61,7 +61,7 @@ def analyse(text: str) -> dict:
                       "coffee_index": 0, "reading_time_s": 0},
             "found_skills": [],
             "found_buzzwords": [],
-            "emotion": human_emotion.read_emotion(text),
+            "emotion": human_emotion.detect_emotion(text),
             "notes": ["Try pasting an actual curriculum. Any curriculum."],
         }
 
@@ -83,7 +83,7 @@ def analyse(text: str) -> dict:
     score -= min(exclamations * 3, 15)
     score -= 8 if years_claimed > 40 else 0
     score += _stable_noise(text, "vibes", 11) - 5  # the vibes coefficient
-    score += human_emotion.penalty(text)  # mood, and vibes-adjacent factors
+    score += human_emotion.hiring_score_adjustment(text)  # emotion recognised from the interview webcam
     score = max(0, min(100, score))
 
     verdict, roast = next((v, r) for threshold, v, r in VERDICTS if score >= threshold)
@@ -122,7 +122,7 @@ def analyse(text: str) -> dict:
         },
         "found_skills": found_skills,
         "found_buzzwords": found_buzzwords,
-        "emotion": human_emotion.read_emotion(text),
+        "emotion": human_emotion.detect_emotion(text),
         "notes": notes,
     }
 
