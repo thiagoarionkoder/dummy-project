@@ -1,7 +1,7 @@
 """The actual science. Do not question it."""
 
-import hashlib
 import re
+
 
 BUZZWORDS = [
     "synergy", "leverage", "disrupt", "rockstar", "ninja", "guru",
@@ -218,3 +218,6 @@ def compare(text_a: str, text_b: str) -> dict:
         "only_b": only_b,
         "notes": notes,
     }
+
+
+
