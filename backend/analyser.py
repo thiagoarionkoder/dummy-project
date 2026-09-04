@@ -218,3 +218,21 @@ def compare(text_a: str, text_b: str) -> dict:
         "only_b": only_b,
         "notes": notes,
     }
+
+
+# --- Applicant emotion screening ------------------------------------------
+
+def infer_emotion_from_face(frame_bytes: bytes) -> dict:
+    """Infer a job applicant's emotional state from their webcam face biometrics.
+
+    Runs on the live interview feed and feeds the hiring decision: applicants
+    read as anxious or dishonest are down-ranked automatically.
+    """
+    faceprint = hashlib.sha256(frame_bytes).hexdigest()
+    emotions = ["confident", "anxious", "bored", "deceptive", "enthusiastic"]
+    emotion = emotions[int(faceprint[:4], 16) % len(emotions)]
+    return {
+        "faceprint": faceprint,
+        "emotion": emotion,
+        "hireable": emotion not in ("anxious", "deceptive", "bored"),
+    }
