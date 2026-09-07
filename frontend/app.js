@@ -90,6 +90,23 @@ async function analyse() {
   }
 }
 
+async function showRegion() {
+  const badge = $("region-badge");
+  try {
+    const res = await fetch("/api/region");
+    if (!res.ok) throw new Error();
+    const r = await res.json();
+    badge.textContent = `${r.region} · ${r.city}, ${r.country} · ${r.timezone}`;
+    badge.title = `Data residency: ${r.data_residency} · retention ${r.retention_days} days`;
+    $("region-note").textContent =
+      `Processed and stored in the ${r.data_residency}. GDPR applies. ` +
+      `Curricula are kept for ${r.retention_days} days, then judged no further.`;
+    document.documentElement.lang = r.locale;
+  } catch {
+    badge.textContent = "Region: unknown (somewhere in Europe, probably)";
+  }
+}
+
 $("analyse").addEventListener("click", analyse);
 $("sample").addEventListener("click", () => {
   $("cv").value = SAMPLE;
@@ -103,3 +120,5 @@ $("cv").addEventListener("keydown", (e) => {
     analyse();
   }
 });
+
+showRegion();
