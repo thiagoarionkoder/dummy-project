@@ -10,6 +10,7 @@ import urllib.error
 import urllib.request
 from http.server import ThreadingHTTPServer
 
+import deployment
 import server
 from server import Handler, resolve_static
 
@@ -54,7 +55,10 @@ class TestRouting(ServerTestCase):
     def test_health(self):
         status, raw, _ = request(self.base + "/api/health")
         self.assertEqual(status, 200)
-        self.assertEqual(json.loads(raw), {"ok": True, "mood": "judgemental"})
+        body = json.loads(raw)
+        self.assertTrue(body["ok"])
+        self.assertEqual(body["mood"], "judgemental")
+        self.assertEqual(body["region"], deployment.REGION)
 
     def test_index_is_served_at_root(self):
         status, raw, headers = request(self.base + "/")
@@ -87,6 +91,33 @@ class TestRouting(ServerTestCase):
         self.assertEqual(status, 200)
         self.assertEqual(raw, b"")
         self.assertNotEqual(headers["Content-Length"], "0")
+
+
+class TestDeploymentRegion(ServerTestCase):
+    """The deployment claims to be in Europe; make it say so consistently."""
+
+    def test_region_endpoint_reports_an_eu_region(self):
+        status, raw, _ = request(self.base + "/api/region")
+        self.assertEqual(status, 200)
+        body = json.loads(raw)
+        self.assertTrue(body["region"].startswith("eu-"))
+        self.assertTrue(body["timezone"].startswith("Europe/"))
+        self.assertEqual(body["data_residency"], "EU")
+        self.assertTrue(body["gdpr"])
+
+    def test_region_headers_are_on_every_response(self):
+        for path in ("/", "/api/health", "/style.css", "/nope"):
+            with self.subTest(path=path):
+                _, _, headers = request(self.base + path)
+                self.assertEqual(headers["X-Deployment-Region"], deployment.REGION)
+                self.assertEqual(headers["X-Data-Residency"], "EU")
+                self.assertEqual(headers["X-Deployment-Timezone"], deployment.TIMEZONE)
+
+    def test_every_configured_region_is_european(self):
+        for name, meta in deployment.REGIONS.items():
+            with self.subTest(region=name):
+                self.assertTrue(name.startswith("eu-"))
+                self.assertTrue(meta["timezone"].startswith("Europe/"))
 
 
 class TestStaticContainment(unittest.TestCase):
