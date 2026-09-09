@@ -3,6 +3,7 @@
 import hashlib
 import re
 
+
 BUZZWORDS = [
     "synergy", "leverage", "disrupt", "rockstar", "ninja", "guru",
     "10x", "paradigm", "holistic", "proactive", "ecosystem",
