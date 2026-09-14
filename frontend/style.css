@@ -87,3 +87,15 @@ li { margin-bottom: .35rem; }
   background: #2a1a1f; border: 1px solid #6b3b3b; color: #ff9d9d;
   border-radius: 10px; padding: .8rem 1rem; margin: 0 0 1rem;
 }
+
+.deploy {
+  margin-top: 1.5rem; text-align: center;
+  color: var(--muted); font-size: .8rem;
+  display: flex; flex-direction: column; gap: .35rem; align-items: center;
+}
+.region {
+  border: 1px solid var(--line); border-radius: 999px;
+  padding: .2rem .7rem; font: 12px/1.6 ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color: var(--accent-2);
+}
+.region-note { max-width: 46ch; }
