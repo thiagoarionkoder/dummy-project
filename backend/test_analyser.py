@@ -83,7 +83,8 @@ class TestShape(unittest.TestCase):
     def test_response_contract(self):
         r = analyse("Python, SQL, Docker. 5 years.")
         self.assertEqual(set(r), {"score", "verdict", "roast", "stats",
-                                  "found_skills", "found_buzzwords", "notes"})
+                                  "found_skills", "found_buzzwords",
+                                  "emotion", "notes"})
         self.assertEqual(set(r["stats"]), {"words", "buzzwords", "skills", "years_claimed",
                                            "exclamations", "coffee_index", "reading_time_s"})
         self.assertEqual(r["stats"]["skills"], len(r["found_skills"]))
