@@ -1,6 +1,5 @@
 """The actual science. Do not question it."""
 
-import hashlib
 import re
 
 
