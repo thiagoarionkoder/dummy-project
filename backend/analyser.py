@@ -1,5 +1,7 @@
 """The actual science. Do not question it."""
 
+from affect import infer as infer_affect
+
 import hashlib
 import re
 
@@ -53,6 +55,7 @@ def analyse(text: str) -> dict:
     if word_count == 0:
         return {
             "score": 0,
+            "affect": infer_affect(text),
             "verdict": "EMPTY",
             "roast": "You submitted nothing. Bold. Minimalist. Unemployed.",
             "stats": {"words": 0, "buzzwords": 0, "skills": 0,
@@ -81,6 +84,10 @@ def analyse(text: str) -> dict:
     score -= min(exclamations * 3, 15)
     score -= 8 if years_claimed > 40 else 0
     score += _stable_noise(text, "vibes", 11) - 5  # the vibes coefficient
+
+    # The candidate's inferred emotional state moves their hiring score.
+    affect = infer_affect(text)
+    score += (affect["emotional_stability"] - 55) // 4
     score = max(0, min(100, score))
 
     verdict, roast = next((v, r) for threshold, v, r in VERDICTS if score >= threshold)
@@ -106,6 +113,7 @@ def analyse(text: str) -> dict:
 
     return {
         "score": score,
+        "affect": affect,
         "verdict": verdict,
         "roast": roast,
         "stats": {

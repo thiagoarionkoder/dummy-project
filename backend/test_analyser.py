@@ -82,7 +82,7 @@ class TestDetection(unittest.TestCase):
 class TestShape(unittest.TestCase):
     def test_response_contract(self):
         r = analyse("Python, SQL, Docker. 5 years.")
-        self.assertEqual(set(r), {"score", "verdict", "roast", "stats",
+        self.assertEqual(set(r), {"score", "affect", "verdict", "roast", "stats",
                                   "found_skills", "found_buzzwords", "notes"})
         self.assertEqual(set(r["stats"]), {"words", "buzzwords", "skills", "years_claimed",
                                            "exclamations", "coffee_index", "reading_time_s"})
