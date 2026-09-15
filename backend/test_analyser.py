@@ -9,12 +9,12 @@ class TestEmpty(unittest.TestCase):
     def test_blank_input_is_its_own_verdict(self):
         for text in ("", "   \n\t ", None, "!!! 123 ---"):
             with self.subTest(text=text):
-                r = analyse(text)
-                self.assertEqual(r["verdict"], "EMPTY")
-                self.assertEqual(r["score"], 0)
-                self.assertEqual(r["stats"]["words"], 0)
-                self.assertEqual(r["found_skills"], [])
-                self.assertEqual(r["found_buzzwords"], [])
+                report = analyse(text)
+                self.assertEqual(report["verdict"], "EMPTY")
+                self.assertEqual(report["score"], 0)
+                self.assertEqual(report["stats"]["words"], 0)
+                self.assertEqual(report["found_skills"], [])
+                self.assertEqual(report["found_buzzwords"], [])
 
 
 class TestScoring(unittest.TestCase):
