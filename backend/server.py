@@ -5,6 +5,7 @@ import os
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import unquote
 
+import grader
 from analyser import analyse, compare
 
 PORT = int(os.environ.get("PORT", "8000"))
@@ -60,7 +61,8 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         path = self.path.split("?")[0]
         if path == "/api/health":
-            return self._send(200, json.dumps({"ok": True, "mood": "judgemental"}))
+            return self._send(200, json.dumps(
+                {"ok": True, "mood": "judgemental", "grading": grader.available()}))
 
         target = resolve_static(path)
         if target is None:
@@ -80,7 +82,8 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         path = self.path.split("?")[0]
-        if path not in ("/api/analyse", "/api/compare"):
+        if path not in ("/api/analyse", "/api/compare",
+                        "/api/grade", "/api/grade-compare"):
             return self._abort(404, "not found")
 
         try:
@@ -100,20 +103,35 @@ class Handler(BaseHTTPRequestHandler):
         if not isinstance(data, dict):
             return self._error(400, "body must be a JSON object")
 
-        if path == "/api/compare":
+        if path in ("/api/compare", "/api/grade-compare"):
             texts = []
             for key in ("a", "b"):
                 value = data.get(key, "")
                 if not isinstance(value, str):
                     return self._error(400, f"'{key}' must be a string")
                 texts.append(value)
-            return self._send(200, json.dumps(compare(*texts)))
+            if path == "/api/compare":
+                return self._send(200, json.dumps(compare(*texts)))
+            return self._graded(grader.grade_head_to_head, *texts)
 
         text = data.get("text", "")
         if not isinstance(text, str):
             return self._error(400, "'text' must be a string")
 
+        if path == "/api/grade":
+            return self._graded(grader.grade, text)
+
         self._send(200, json.dumps(analyse(text)))
+
+    def _graded(self, func, *args):
+        """Run an LLM grading call. A missing model is a 503, not a stack trace."""
+        try:
+            result = func(*args)
+        except grader.GraderUnavailable as exc:
+            return self._error(503, str(exc))
+        except Exception:
+            return self._error(502, "The examinations board malfunctioned.")
+        self._send(200, json.dumps(result))
 
     def log_message(self, *args):
         pass  # shhh
