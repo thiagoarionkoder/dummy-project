@@ -5,9 +5,11 @@ import os
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import unquote
 
+import deployment
 from analyser import analyse, compare
 
 PORT = int(os.environ.get("PORT", "8000"))
+HOST = os.environ.get("HOST", "0.0.0.0")
 FRONTEND = os.path.realpath(
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "frontend")
 )
@@ -43,6 +45,8 @@ class Handler(BaseHTTPRequestHandler):
         self.send_response(status)
         self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(payload)))
+        for name, value in deployment.headers():
+            self.send_header(name, value)
         for name, value in headers:
             self.send_header(name, value)
         self.end_headers()
@@ -60,7 +64,11 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         path = self.path.split("?")[0]
         if path == "/api/health":
-            return self._send(200, json.dumps({"ok": True, "mood": "judgemental"}))
+            return self._send(200, json.dumps(
+                {"ok": True, "mood": "judgemental", **deployment.info()}))
+
+        if path == "/api/region":
+            return self._send(200, json.dumps(deployment.info()))
 
         target = resolve_static(path)
         if target is None:
@@ -121,4 +129,6 @@ class Handler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     print(f"Curriculum Analyser judging candidates at http://localhost:{PORT}")
-    ThreadingHTTPServer(("0.0.0.0", PORT), Handler).serve_forever()
+    print(f"Region: {deployment.REGION} ({deployment.CITY}, {deployment.COUNTRY}) "
+          f"| {deployment.TIMEZONE} | data stays in {deployment.DATA_RESIDENCY}")
+    ThreadingHTTPServer((HOST, PORT), Handler).serve_forever()

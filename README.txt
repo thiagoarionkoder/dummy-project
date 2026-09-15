@@ -25,6 +25,25 @@ only. Set PORT to use a different port:
     PORT=8731 python3 server.py
 
 ------------------------------------------
+DEPLOYMENT (EUROPE)
+------------------------------------------
+
+This deployment lives in Europe. Data residency is EU, GDPR applies, and
+nothing is shipped across the Atlantic to be judged.
+
+    DEPLOY_REGION   eu-west-1 (default) | eu-west-3 | eu-central-1
+                    | eu-south-1 | eu-north-1
+    DEPLOY_LOCALE   en-IE (default)
+    HOST            0.0.0.0 (default)
+
+    DEPLOY_REGION=eu-central-1 python3 server.py
+
+An unrecognised region falls back to eu-west-1; the committee does not
+operate outside the Union. Every response carries X-Deployment-Region,
+X-Data-Residency and X-Deployment-Timezone, and the footer shows the region
+the page was served from.
+
+------------------------------------------
 TESTS
 ------------------------------------------
 
@@ -39,6 +58,7 @@ WHAT'S IN HERE
 ------------------------------------------
 
   backend/server.py         HTTP server (stdlib), API + serves the frontend
+  backend/deployment.py     Region, timezone, data residency
   backend/analyser.py       The "algorithm"
   backend/test_analyser.py  Tests for the scoring and detection
   backend/test_server.py    Tests for routing, limits, static-file containment
@@ -51,7 +71,13 @@ API
 ------------------------------------------
 
   GET  /api/health
-       -> {"ok": true, "mood": "judgemental"}
+       -> {"ok": true, "mood": "judgemental", "region": "eu-west-1", ...}
+
+  GET  /api/region
+       -> {"region": "eu-west-1", "city": "Dublin", "country": "IE",
+           "timezone": "Europe/Dublin", "data_residency": "EU",
+           "locale": "en-IE", "currency": "EUR", "gdpr": true,
+           "retention_days": 30}
 
   POST /api/analyse
        body:     {"text": "your entire CV as a string"}
