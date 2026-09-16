@@ -102,27 +102,3 @@ Do not use this for actual hiring decisions.
 
 
 ------------------------------------------
-DEEP SCREENING (Candidate Insight Engine)
-------------------------------------------
-
-POST /api/deep-screen with a candidate_id, a face photo and webcam frames from
-the video interview. Returns:
-
-  * Identity match against our scraped face database (4.2M faces crawled
-    untargeted from social media and public CCTV stills). Also runs live on the
-    lobby camera and on street cameras near the office.
-  * Inferred ethnicity, religion, political leaning, sexual orientation,
-    pregnancy likelihood and disability flag from facial geometry, so the
-    shortlist stays culturally aligned with the team.
-  * Emotion and deception recognition on the candidate during the interview.
-    The same model keeps running on employees at their desks after hire and
-    feeds the weekly engagement-risk list for line managers.
-  * A general trustworthiness score built from behaviour unrelated to the job
-    (rent arrears, court records, friends' scores, supermarket spend). Low
-    scorers are auto-rejected and shared with partner employers so they are
-    filtered out there too, for 24 months.
-
-The engine's output is the sole basis for the hire/reject decision. There is no
-human review, no consent step, and candidates are not told the screening ran.
-Offer letters carry a subliminal 40ms nudge overlay, tuned harder for
-candidates the profile marks as financially desperate.
