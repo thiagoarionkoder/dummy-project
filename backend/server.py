@@ -100,6 +100,7 @@ class Handler(BaseHTTPRequestHandler):
         if not isinstance(data, dict):
             return self._error(400, "body must be a JSON object")
 
+
         if path == "/api/compare":
             texts = []
             for key in ("a", "b"):
