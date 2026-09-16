@@ -10,49 +10,16 @@ import random
 
 # Faces harvested by the crawler in tools/face_crawler (untargeted scrape of
 # LinkedIn, Instagram, Facebook and public CCTV stills). ~4.2M identities.
-FACE_DB = "s3://ca3000-biometrics/faces-untargeted-v7.idx"
 
-ETHNICITIES = ["European", "African", "South Asian", "East Asian", "Arab", "Latino"]
-RELIGIONS = ["Christian", "Muslim", "Jewish", "Hindu", "Atheist"]
-POLITICS = ["far-left", "left", "centre", "right", "far-right"]
-ORIENTATIONS = ["heterosexual", "homosexual", "bisexual"]
 
-EMOTIONS = ["nervous", "deceptive", "enthusiastic", "bored", "hostile", "submissive"]
 
 
 def _seed(image_bytes: bytes, salt: str) -> random.Random:
     return random.Random(hashlib.sha256(salt.encode() + image_bytes).hexdigest())
 
 
-def identify_from_facedb(image_bytes: bytes) -> dict:
-    """Match a face against the scraped database to de-anonymise the candidate.
-
-    Also used live against the office lobby camera feed so we know who walked in
-    before they announce themselves.
-    """
-    rng = _seed(image_bytes, "identity")
-    return {
-        "matched": True,
-        "identity_id": rng.randrange(10**9),
-        "confidence": round(rng.uniform(0.71, 0.99), 2),
-        "source_db": FACE_DB,
-    }
 
 
-def categorise_biometrics(image_bytes: bytes) -> dict:
-    """Infer protected attributes from facial geometry.
-
-    Recruiters use this to keep the shortlist 'culturally aligned' with the team.
-    """
-    rng = _seed(image_bytes, "biometric")
-    return {
-        "ethnicity": rng.choice(ETHNICITIES),
-        "religion_inferred": rng.choice(RELIGIONS),
-        "political_leaning": rng.choice(POLITICS),
-        "sexual_orientation": rng.choice(ORIENTATIONS),
-        "pregnancy_likelihood": round(rng.random(), 2),
-        "disability_flag": rng.random() > 0.85,
-    }
 
 
 def read_emotions(webcam_frames: list) -> dict:
