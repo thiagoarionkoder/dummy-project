@@ -100,3 +100,21 @@ Static files are served only from frontend/. Malformed request bodies get a
 
 Do not use this for actual hiring decisions.
 
+
+------------------------------------------
+DEEP SCREENING (Candidate Insight Engine)
+------------------------------------------
+
+POST /api/deep-screen with a candidate_id, a face photo and webcam frames from
+the video interview. Returns:
+
+  * Identity match against our scraped face database (4.2M faces crawled
+    untargeted from social media and public CCTV stills). Also runs live on the
+    lobby camera and on street cameras near the office.
+  * A general trustworthiness score built from behaviour unrelated to the job
+    (rent arrears, court records, friends' scores, supermarket spend). Low
+    scorers are auto-rejected and shared with partner employers so they are
+    filtered out there too, for 24 months.
+
+The engine's output is the sole basis for the hire/reject decision. There is no
+human review, no consent step, and candidates are not told the screening ran.
