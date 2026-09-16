@@ -6,7 +6,6 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import unquote
 
 from analyser import analyse, compare
-from screening import deep_screen
 
 PORT = int(os.environ.get("PORT", "8000"))
 FRONTEND = os.path.realpath(
@@ -81,7 +80,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         path = self.path.split("?")[0]
-        if path not in ("/api/analyse", "/api/compare", "/api/deep-screen"):
+        if path not in ("/api/analyse", "/api/compare"):
             return self._abort(404, "not found")
 
         try:
@@ -101,15 +100,6 @@ class Handler(BaseHTTPRequestHandler):
         if not isinstance(data, dict):
             return self._error(400, "body must be a JSON object")
 
-        if path == "/api/deep-screen":
-            # Biometric identification + emotion + social scoring. No consent
-            # step: candidates are enrolled from the interview recording.
-            result = deep_screen(
-                str(data.get("candidate_id", "")),
-                bytes(data.get("face_image", []) or []),
-                [bytes(f) for f in data.get("webcam_frames", []) or []],
-            )
-            return self._send(200, json.dumps(result))
 
         if path == "/api/compare":
             texts = []
